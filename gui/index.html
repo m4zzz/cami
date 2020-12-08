@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'"> -->
+    <!-- <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'"> -->
+    <title>Hello World!</title>
+  </head>
+  <body>
+
+    <div id="editor"> </div>
+
+    <script>
+      window.onload = function () {
+          const editor = document.getElementById("editor");
+
+          function receivedMessage(msg) {
+              editor.textContent += msg.data;
+          }
+
+          const ws = new WebSocket("ws://localhost:12345/chat");
+          ws.addEventListener('message', receivedMessage);
+
+          document.addEventListener("keydown", (e) => {
+              // console.log(e.key)
+              ws.send(e.key);
+          })
+      };
+    </script>
+
+    <!-- You can also require other files to run in this process -->
+    <script src="./renderer.js"></script>
+  </body>
+</html>
