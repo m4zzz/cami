@@ -7,13 +7,22 @@
 (defun handle-new-connection (con)
   (setf *con* con))
 
-(defun send-back (connection message)
-  (print message)
-  (websocket-driver:send connection message))
+(defun curse-last-char (str)
+  (str+ (subseq str 0 (1- (length str)))
+	(str+ "<span style=\"background-color: black; color: white;\">"
+	      (string (elt str (1- (length str))))
+	      "</span>")))
+
+
+(defun recv (connection message)
+  (format t "*buffer*: ~A~%msg: ~A~%" *buffer* message)
+  (setf *buffer* (str+ *buffer* message))
+  (websocket-driver:send connection (curse-last-char *buffer*)))
 
 (defun handle-close-connection (connection)
   (let ((message (format nil "Alpha has left: ~A~%" (random 100))))
     (remhash connection *connections*)
+    (setf *buffer* "")
     (print message)))
 
 (defun cami (env)
@@ -22,7 +31,7 @@
                          (lambda () (handle-new-connection ws)))
 
     (websocket-driver:on :message ws
-                         (lambda (msg) (send-back ws msg)))
+                         (lambda (msg) (recv ws msg)))
 
     (websocket-driver:on :close ws
                          (lambda (&key code reason)

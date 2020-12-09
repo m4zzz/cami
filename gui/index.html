@@ -16,7 +16,8 @@
           const editor = document.getElementById("editor");
 
           function receivedMessage(msg) {
-              editor.textContent += msg.data;
+	      console.log(msg.data);
+              editor.innerHTML = msg.data;
           }
 
           const ws = new WebSocket("ws://localhost:12345/chat");
