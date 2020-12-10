@@ -9,9 +9,6 @@
   `(with-html-string
     (,tag (:raw ,str))))
 
-(defun last1 (seq)
-  (elt seq (1- (length seq))))
-
 (defun handle-new-connection (con)
   (setf *con* con))
 
