@@ -12,4 +12,6 @@
   :serial t
   :components ((:file "package")
                (:file "cami-utils")
+	       (:file "keys")
+	       (:file "cursor")
                (:file "cami")))

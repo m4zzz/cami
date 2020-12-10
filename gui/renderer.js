@@ -5,7 +5,19 @@
 // selectively enable features needed in the rendering
 // process.
 
+window.onload = function () {
+    const editor = document.getElementById("editor");
 
-function myFunction() {
-    alert("hey!!!!")
-}
+    function receivedMessage(msg) {
+	console.log(msg.data);
+        editor.innerHTML = msg.data;
+    }
+
+    const ws = new WebSocket("ws://localhost:12345/chat");
+    ws.addEventListener('message', receivedMessage);
+
+    document.addEventListener("keydown", (e) => {
+        // console.log(e.key)
+        ws.send(e.key);
+    })
+};

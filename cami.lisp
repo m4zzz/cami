@@ -2,27 +2,66 @@
 
 (defvar *connections* (make-hash-table))
 (defparameter *con* nil)
-(defparameter *buffer* nil)
+(defparameter *buffer* (uiop:read-file-lines "~/guix-install.sh"))
+(defparameter *cursor-pos* '(1 1))
+
+(defmacro wrap-tag (tag str)
+  `(with-html-string
+    (,tag (:raw ,str))))
+
+(defun last1 (seq)
+  (elt seq (1- (length seq))))
 
 (defun handle-new-connection (con)
   (setf *con* con))
 
-(defun curse-last-char (str)
-  (str+ (subseq str 0 (1- (length str)))
-	(str+ "<span style=\"background-color: black; color: white;\">"
-	      (string (elt str (1- (length str))))
-	      "</span>")))
+(defun curse (str)
+  "wrap the str with a cursor"
+  (with-html-string
+    (:span :style "background-color: black; color: white;"
+	   (:raw (string str)))))
 
+(defun break-line (line pos)
+  "break line into before-cursor, cursor, after-cursor"
+  (let* ((before-cursor (if (zerop (buf-col pos))
+			    ""
+			    (subseq line 0 (buf-col pos))))
+	 (cursor (string (elt line (buf-col pos))))
+	 (after-cursor (if (= (get-y pos) (length line))
+			   ""
+			   (subseq line (get-y pos)))))
+    (list before-cursor cursor after-cursor)))
+
+(defun escape-buffer (buf pos)
+  "escape the buffer"
+  (let ((line (get-line pos))
+	(escaped-buffer (mapcar #'spinneret::escape-string buf)))
+    (setf (elt escaped-buffer (buf-row pos))
+	  (str+ (spinneret::escape-string (car (break-line line pos)))
+		(curse (cadr (break-line line pos)))
+		(spinneret::escape-string (caddr (break-line line pos)))))
+    escaped-buffer))
+
+(defun reduce-buffer (buf)
+  "reduce it so that it can be sent"
+  (setf buf (escape-buffer buf *cursor-pos*))
+  (setf buf (mapcar #'(lambda (line)	;add line breaks
+			(wrap-tag :br line))
+		    buf))
+  (reduce #'(lambda (x y)		;join all the strings
+	      (str+ x y))
+	  buf))
 
 (defun recv (connection message)
-  (format t "*buffer*: ~A~%msg: ~A~%" *buffer* message)
-  (setf *buffer* (str+ *buffer* message))
-  (websocket-driver:send connection (curse-last-char *buffer*)))
+  (let ((buf (copy-seq *buffer*)))
+    (if (modifierp message) (update-cursor (move-cursor message)))
+    (websocket-driver:send connection (reduce-buffer buf))))
 
 (defun handle-close-connection (connection)
   (let ((message (format nil "Alpha has left: ~A~%" (random 100))))
     (remhash connection *connections*)
-    (setf *buffer* "")
+    (setf *buffer* (uiop:read-file-lines "~/guix-install.sh"))
+    (setf *cursor-pos* '(1 1))
     (print message)))
 
 (defun cami (env)
