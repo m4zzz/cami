@@ -29,14 +29,32 @@
 			   (subseq line (get-y pos)))))
     (list before-cursor cursor after-cursor)))
 
+(defun esc-str (str)
+  "escape the string"
+  (if (empty-string-p str)
+      ""
+      (reduce #'(lambda (x y)
+	      (cami::str+ x y))
+	  (map 'list #'(lambda (x)
+			 (if (equal x #\Space)
+			     "&nbsp;"
+			     (spinneret::escape-string (string x))))
+	       str))))
+
+(defun esc-str2 (str)
+  "escape the string"
+  (if (string= str " ")
+      "&nbsp;"
+      (spinneret::escape-string str)))
+
 (defun escape-buffer (buf pos)
   "escape the buffer"
   (let ((line (get-line pos))
-	(escaped-buffer (mapcar #'spinneret::escape-string buf)))
+	(escaped-buffer (mapcar #'esc-str buf)))
     (setf (elt escaped-buffer (buf-row pos))
-	  (str+ (spinneret::escape-string (car (break-line line pos)))
-		(curse (cadr (break-line line pos)))
-		(spinneret::escape-string (caddr (break-line line pos)))))
+	  (str+ (esc-str (first (break-line line pos)))
+		(curse (esc-str (second (break-line line pos))))
+		(esc-str (third (break-line line pos)))))
     escaped-buffer))
 
 (defun reduce-buffer (buf)
