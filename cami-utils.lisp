@@ -14,6 +14,14 @@
 	      (concatenate 'string (string x) (string y)))
 	  strings))
 
+(defun red-str (lst)
+  "lst is a list of strings"
+  (reduce #'str+ lst))
+
+(defmacro map-str (fn str)
+  "map over a string and return a string"
+  `(red-str (map 'list ,fn ,str)))
+
 (defun rep (str pos with)
   "replace the element at pos in str"
   (cond ((= pos 0) (str+ with (subseq str 1)))

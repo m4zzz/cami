@@ -9,9 +9,6 @@
   `(with-html-string
     (,tag (:raw ,str))))
 
-(defun handle-new-connection (con)
-  (setf *con* con))
-
 (defun curse (str)
   "wrap the str with a cursor"
   (with-html-string
@@ -20,32 +17,24 @@
 
 (defun break-line (line pos)
   "break line into before-cursor, cursor, after-cursor"
-  (let* ((before-cursor (if (zerop (buf-col pos))
-			    ""
-			    (subseq line 0 (buf-col pos))))
-	 (cursor (string (elt line (buf-col pos))))
-	 (after-cursor (if (= (get-y pos) (length line))
+  (let ((before-cursor (if (zerop (line-i))
 			   ""
-			   (subseq line (get-y pos)))))
+			   (subseq line 0 (line-i))))
+	(cursor (string (line-char line)))
+	(after-cursor (if (= (get-y pos) (length line))
+			  ""
+			  (subseq line (get-y pos)))))
     (list before-cursor cursor after-cursor)))
 
 (defun esc-str (str)
   "escape the string"
   (if (empty-string-p str)
       ""
-      (reduce #'(lambda (x y)
-	      (cami::str+ x y))
-	  (map 'list #'(lambda (x)
-			 (if (equal x #\Space)
-			     "&nbsp;"
-			     (spinneret::escape-string (string x))))
-	       str))))
-
-(defun esc-str2 (str)
-  "escape the string"
-  (if (string= str " ")
-      "&nbsp;"
-      (spinneret::escape-string str)))
+      (map-str #'(lambda (x)
+		   (if (equal x #\Space)
+		       "&nbsp;"
+		       (spinneret::escape-string (string x))))
+	       str)))
 
 (defun escape-buffer (buf pos)
   "escape the buffer"
@@ -66,6 +55,9 @@
   (reduce #'(lambda (x y)		;join all the strings
 	      (str+ x y))
 	  buf))
+
+(defun handle-new-connection (con)
+  (setf *con* con))
 
 (defun recv (connection message)
   (let ((buf (copy-seq *buffer*)))

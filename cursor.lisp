@@ -33,31 +33,43 @@
 
 (defun buf-col (pos)
   (if (valid-pos-p pos)
-    (1- (get-y pos))))
+      (1- (get-y pos))))
+
+(defmacro buf-i ()
+  `(buf-row pos))
+
+(defmacro line-i ()
+  `(buf-col pos))
+
+(defmacro buf-line (buf)
+  `(elt ,buf (buf-i)))
+
+(defmacro line-char (line)
+  `(elt ,line (line-i)))
 
 (defun buf-length ()
   "the number of lines"
   (length *buffer*))
 
-(defun get-line (pos)
-  "get the line string from buffer"
-  (if (valid-pos-p pos)
-      (elt *buffer* (buf-row pos))))
-
-(defun get-char (pos)
-  "get the char at pos in line"
-  (if (valid-pos-p pos)
-      (elt (get-line pos) (buf-col pos))))
-
 (defun line-length (pos)
   (if (valid-pos-p pos)
       (length (get-line pos))))
 
+(defun get-line (pos)
+  "get the line string from *buffer*"
+  (if (valid-pos-p pos)
+      (buf-line *buffer*)))
+
+(defun get-char (pos)
+  "get the char at pos in line"
+  (if (valid-pos-p pos)
+      (line-char (get-line pos))))
+
 (defun out-of-bounds-p (pos)
   "check if pos is where it shouldn't be"
   (if (valid-pos-p pos)
-      (if (and (> (buf-length) (buf-row pos))
-	       (> (line-length pos) (buf-col pos)))
+      (if (and (> (buf-length) (buf-i))
+	       (> (line-length pos) (line-i)))
 	  nil t)))
 
 (defun update-cursor (pos)
