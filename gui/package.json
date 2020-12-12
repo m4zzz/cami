@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "codemirror": "^5.58.3",
-    "jquery": "^3.5.1"
+    "jquery": "^3.5.1",
+    "jsonrpc-bidirectional": "^10.0.12"
   }
 }

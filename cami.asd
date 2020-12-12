@@ -6,6 +6,7 @@
   :author "m4zzz"
   :depends-on (:hunchentoot
                :clack
+	       :yason
                :websocket-driver
                :alexandria
                :spinneret)
@@ -14,4 +15,7 @@
                (:file "cami-utils")
 	       (:file "keys")
 	       (:file "cursor")
-               (:file "cami")))
+	       (:file "commands")
+	       (:file "display")
+               (:file "cami")
+	       (:file "server")))

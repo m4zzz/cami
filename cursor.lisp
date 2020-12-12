@@ -76,7 +76,8 @@
   "pos is '(row col)"
   (if (valid-pos-p pos)
       (unless (out-of-bounds-p pos)
-	(setf *cursor-pos* pos))))
+	(setf *cursor-pos* pos)
+	(render *con* *buffer*))))
 
 (defun move-cursor (key)
   "update the cursor accordingly"

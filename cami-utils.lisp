@@ -1,5 +1,15 @@
 (in-package :cami)
 
+(declaim (optimize (speed 0) (space 0) (debug 3)))
+
+(defmacro aif (cond &body body)
+  `(let ((it ,cond))
+     (if it ,@body)))
+
+(defmacro awhen (cond &body body)
+  `(let ((it ,cond))
+     (when it ,@body)))
+
 (defun empty-string-p (str)
   (if (string= str "") t nil))
 
@@ -13,6 +23,13 @@
   (reduce #'(lambda (x y)
 	      (concatenate 'string (string x) (string y)))
 	  strings))
+
+(defun lookup (alist hash &key (test #'string=))
+  "lookup alist when strings are keys"
+  (alexandria:assoc-value alist hash :test test))
+
+(defun do-nothing ()
+  (print "do-nothing"))
 
 (defun red-str (lst)
   "lst is a list of strings"
