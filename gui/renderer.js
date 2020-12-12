@@ -20,7 +20,11 @@ window.onload = function () {
 	}
 	if (command == "reload") {
 	    location.reload();
-	}}
+	}
+
+
+
+    }
 
 	function callCommand(msg) {
 	    const order = JSON.parse(msg.data);
